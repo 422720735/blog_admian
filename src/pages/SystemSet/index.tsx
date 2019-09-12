@@ -14,7 +14,6 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
     const { form } = this.props;
     form.validateFields((err, data) => {
       console.log(data, err)
-      debugger
     })
   }
 

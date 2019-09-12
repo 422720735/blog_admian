@@ -119,6 +119,7 @@ export default {
             {
               path: '/system',
               name: 'SystemSet',
+              icon: 'form',
               component: './SystemSet'
             },
             {

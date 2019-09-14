@@ -120,7 +120,19 @@ export default {
               path: '/system',
               name: 'SystemSet',
               icon: 'form',
-              component: './SystemSet'
+              component: './SystemSet',
+            },
+            {
+              path: '/center',
+              name: 'center',
+              icon: 'align-center',
+              routes: [
+                {
+                  path: '/center/type',
+                  name: 'type',
+                  component: './Center',
+                },
+              ],
             },
             {
               component: './404',
@@ -184,13 +196,12 @@ export default {
     basePath: '/',
   },
   chainWebpack: webpackPlugin,
-  /*
+
   proxy: {
-    '/server/api/': {
-      target: 'https://preview.pro.ant.design/',
+    '/api/': {
+      target: 'https://localhost:4000/',
       changeOrigin: true,
-      pathRewrite: { '^/server': '' },
+      pathRewrite: { '^/api': '' },
     },
   },
-  */
 } as IConfig;

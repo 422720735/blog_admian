@@ -1,6 +1,8 @@
 export default {
   'menu.welcome': '欢迎',
   'menu.SystemSet': '系统设置',
+  'menu.center': '内容管理',
+  'menu.center.type': '分类管理',
   'menu.more-blocks': '更多区块',
   'menu.home': '首页',
   'menu.login': '登录',

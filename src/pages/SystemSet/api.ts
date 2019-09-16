@@ -15,7 +15,7 @@ export function getSystem(): request.PageRes<{
   start: string;
   qq: string;
 }> {
-  return http.get(`${host}/system`);
+  return http.get(`${host}/system/get`);
 }
 
 /**
@@ -31,5 +31,5 @@ export function postSystem(data: {
   start?: string;
   qq?: string;
 }): request.PageRes<string> {
-  return http.post(`${host}/system`, data);
+  return http.post(`${host}/system/post`, data);
 }

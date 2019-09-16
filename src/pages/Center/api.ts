@@ -6,7 +6,7 @@ import host from '@/utils/http/HOST';
 export function getCategory(): request.PageRes<
   { id?: number; created?: number; updated?: number; name?: string }[]
 > {
-  return http.get(`${host}/tag`);
+  return http.get(`${host}/tag/get`);
 }
 
 export function setCategory(params: {
@@ -15,5 +15,5 @@ export function setCategory(params: {
   created?: number;
   updated?: number;
 }): request.PageRes<string> {
-  return http.post(`${host}/tag`, params);
+  return http.post(`${host}/tagList/post`, params);
 }

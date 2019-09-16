@@ -40,7 +40,8 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
     form.validateFields((err, data) => {
       if (!err) {
         const params = {};
-        for (let key in system) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const key in system) {
           if (data[key] !== system[key]) {
             params[key] = system[key];
             break;
@@ -86,7 +87,7 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
                   message: '必填项不能为空!',
                 },
               ],
-            })(<Input />)}
+            })(<Input/>)}
           </Form.Item>
           <Form.Item label="网址：" hasFeedback>
             {getFieldDecorator('url', {
@@ -97,7 +98,7 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
                   message: '必填项不能为空!',
                 },
               ],
-            })(<Input />)}
+            })(<Input/>)}
           </Form.Item>
           <Form.Item label="关键字：" hasFeedback>
             {getFieldDecorator('keywords', {
@@ -108,7 +109,7 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
                   message: '必填项不能为空!',
                 },
               ],
-            })(<Input />)}
+            })(<Input/>)}
           </Form.Item>
           <Form.Item label="描述：" hasFeedback>
             {getFieldDecorator('description', {
@@ -119,7 +120,7 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
                   message: '必填项不能为空!',
                 },
               ],
-            })(<Input />)}
+            })(<Input/>)}
           </Form.Item>
           <Form.Item label="邮箱：" hasFeedback>
             {getFieldDecorator('email', {
@@ -131,7 +132,7 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
                   message: '必填项不能为空!',
                 },
               ],
-            })(<Input />)}
+            })(<Input/>)}
           </Form.Item>
           <Form.Item label="QQ：" hasFeedback>
             {getFieldDecorator('qq', {
@@ -142,19 +143,21 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
                   message: '必填项不能为空!',
                 },
               ],
-            })(<Input />)}
+            })(<Input/>)}
           </Form.Item>
-          {/*<Form.Item label="开关：">*/}
-          {/*{getFieldDecorator('start', {*/}
-          {/*initialValue: system.start || '',*/}
-          {/*})(*/}
-          {/*<Switch*/}
-          {/*checked={system.start === '1'}*/}
-          {/*checkedChildren="开启"*/}
-          {/*unCheckedChildren="关闭"*/}
-          {/*/>,*/}
-          {/*)}*/}
-          {/*</Form.Item>*/}
+          {/*
+          <Form.Item label="开关：">
+            {getFieldDecorator('start', {
+              initialValue: system.start || '',
+            })(
+              <Switch
+                checked={system.start === '1'}
+                checkedChildren="开启"
+                unCheckedChildren="关闭"
+              />,
+            )}
+          </Form.Item>
+          */}
           <Form.Item wrapperCol={{ span: 12, offset: 3 }}>
             <Button type="primary" htmlType="submit">
               提交

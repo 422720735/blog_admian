@@ -128,13 +128,13 @@ export default class Index extends React.Component<State> {
             title="添加时间"
             dataIndex="created"
             key="created"
-            render={(text, record) => <span>{moment(text * 1000).format('YYYY-MM-DD HH:mm:ss')}</span>}
+            render={(text, record) => <span>{ text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
           />
           <Column
             title="修改时间"
             dataIndex="updated"
             key="updated"
-            render={(text, record) => <span>{moment(text * 1000).format('YYYY-MM-DD HH:mm:ss')}</span>}
+            render={(text, record) => <span>{text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
           />
           <Column
             title="操作"

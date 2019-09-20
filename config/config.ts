@@ -132,6 +132,11 @@ export default {
                   name: 'type',
                   component: './Center',
                 },
+                {
+                  path: '/center/article',
+                  name: 'article',
+                  component: './ArticleList',
+                }
               ],
             },
             {

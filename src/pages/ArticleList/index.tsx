@@ -1,11 +1,12 @@
 import React from 'react';
-import { message, Table, Button, Modal, Input, Popconfirm } from 'antd';
+import { message, Select, Table, Button, Modal, Input, Popconfirm } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
 import moment from 'moment';
 
 const { Column } = Table;
+const { Option } = Select;
 
 interface State {
   tagList: { id?: number; created?: number; updated?: number; name?: string }[];
@@ -110,6 +111,13 @@ export default class Index extends React.Component<State> {
     const { tagList, visible, currentTag } = this.state;
     return (
       <PageHeaderWrapper title={false}>
+        <div>
+          <label>选择类别：</label>
+          <Select defaultValue="lucy" style={{ width: 120 }} loading>
+            <Option value="lucy">Lucy</Option>
+          </Select>
+        </div>
+
         <Button
           onClick={() => this.setState({ visible: !visible })}
           style={{ marginBottom: '20px' }}
@@ -118,6 +126,7 @@ export default class Index extends React.Component<State> {
         >
           添加
         </Button>
+
         <Table
           loading={loading}
           dataSource={tagList}

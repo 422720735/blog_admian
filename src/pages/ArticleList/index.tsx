@@ -1,44 +1,25 @@
 import React from 'react';
-import { message, Select, Table, Button, Modal, Input, Popconfirm } from 'antd';
+import { Select, Button, Input, message, Form } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
+import Table from './Table';
 import httpStatus from '@/utils/http/returnCode';
-import moment from 'moment';
+import { ArticleFollow } from '@/pages/ArticleList/interface';
 
-const { Column } = Table;
 const { Option } = Select;
 
 interface State {
-  tagList: { id?: number; created?: number; updated?: number; name?: string }[];
-  visible: boolean;
-  currentTag: {
-    id?: number;
-    name?: string;
-    created?: number;
-    updated?: number;
-  };
   loading: boolean;
+  tagList: { id?: number; created?: number; updated?: number; name?: string }[];
 }
-
-export default class Index extends React.Component<State> {
+class Index extends React.Component<ArticleFollow.ArticleType, State> {
   state: State = {
-    tagList: [],
-    visible: false,
-    currentTag: {},
     loading: false,
+    tagList: [],
   };
 
   async componentDidMount() {
-    await this.initTag()
-  }
-
-  componentWillUnmount(): void {
-    this.setState({
-      tagList: [],
-      visible: false,
-      currentTag: {},
-      loading: false,
-    })
+    await this.initTag();
   }
 
   async initTag() {
@@ -46,133 +27,81 @@ export default class Index extends React.Component<State> {
       const { loading } = this.state;
       if (!loading) this.setState({ loading: true });
       const response = await Api.getCategory();
+      /**
+       * 组装个全部
+       * */
+      if (response.data.msg.length > 0) {
+        response.data.msg.unshift({ name: '全部', id: 0 });
+      }
       const data = response.data.msg || [];
       if (response.data.code === httpStatus.Ok) {
         this.setState({ tagList: data });
       } else {
         message.error(data);
       }
-      this.setState({ loading: false })
+      this.setState({ loading: false });
     } catch (e) {
       message.error(e);
     }
   }
 
-  /**
-   * 添加编辑模态框
-   * */
-  async handleAddUpdate() {
-    const { currentTag } = this.state;
-    const response = await Api.setCategory(currentTag);
-    if (response.data.code === httpStatus.Ok) {
-      message.success(response.data.msg);
-      await this.initTag()
-    } else {
-      message.error(response.data.msg);
-    }
-    const { visible } = this.state;
-    await this.setState({
-      visible: !visible,
-      currentTag: {},
-    });
-  }
-
-  handleUpdate(text: { id?: number; name?: string; created?: number; updated?: number }) {
-    const { visible } = this.state;
-    this.setState({
-      visible: !visible,
-      currentTag: text,
-    });
-  }
-
-  /**
-   * 修改input的值
-   * @param name
-   */
-  inputValChange(name?: { name: string }) {
-    const { currentTag } = this.state;
-    this.setState({
-      currentTag: {
-        ...currentTag,
-        ...name,
-      },
-    })
-  }
-
-  handleCancel() {
-    this.setState({
-      visible: false,
-      currentTag: {},
-    })
-  }
-
   render() {
-    const { loading } = this.props;
-    const { tagList, visible, currentTag } = this.state;
+    const { tagList, loading } = this.state;
+    // @ts-ignore
+    const {
+      form: { getFieldDecorator },
+    } = this.props;
     return (
       <PageHeaderWrapper title={false}>
-        <div>
-          <label>选择类别：</label>
-          <Select defaultValue="lucy" style={{ width: 120 }} loading>
-            <Option value="lucy">Lucy</Option>
-          </Select>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Form style={{ display: 'flex' }}>
+            <Form.Item>
+              {tagList.length > 0 &&
+                getFieldDecorator('select', {
+                  initialValue: tagList.length > 0 ? tagList[0].id : '', // 这里可以设置一个初始值
+                  rules: [{ required: true, message: '选项不能为空！' }],
+                })(
+                  <Select style={{ width: 200 }}>
+                    {tagList.length > 0
+                      ? tagList.map((item, index) => (
+                          <Option value={item.id} key={index}>
+                            {item.name}
+                          </Option>
+                        ))
+                      : null}
+                  </Select>,
+                )}
+            </Form.Item>
+            <Form.Item>
+              <Input
+                placeholder="请输入要搜索标题"
+                style={{ width: 200, marginLeft: 10, marginRight: 10 }}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" loading={loading}>
+                搜索
+              </Button>
+            </Form.Item>
+          </Form>
+          <Button
+            onClick={() => {}}
+            style={{ marginBottom: '20px' }}
+            type="primary"
+            icon="plus-circle"
+          >
+            添加
+          </Button>
         </div>
-
-        <Button
-          onClick={() => this.setState({ visible: !visible })}
-          style={{ marginBottom: '20px' }}
-          type="primary"
-          icon="plus-circle"
-        >
-          添加
-        </Button>
-
-        <Table
-          loading={loading}
-          dataSource={tagList}
-          rowKey="id"
-        >
-          <Column title="名称" dataIndex="name" key="name" />
-          <Column
-            title="添加时间"
-            dataIndex="created"
-            key="created"
-            render={(text, record) => <span>{ text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
-          />
-          <Column
-            title="修改时间"
-            dataIndex="updated"
-            key="updated"
-            render={(text, record) => <span>{text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
-          />
-          <Column
-            title="操作"
-            render={(text, record) => (
-              <span>
-                <a onClick={() => this.handleUpdate(text)}>编辑</a>&emsp;|&emsp;
-                <Popconfirm title="确定要删除吗？" okText="Yes" cancelText="No">
-                  <a>删除</a>
-                </Popconfirm>
-              </span>
-            )}
-          />
-        </Table>
-        <Modal
-          title={Object.keys(currentTag).length > 0 ? '编辑' : '新增'}
-          visible={visible}
-          onOk={() => this.handleAddUpdate()}
-          onCancel={() => this.handleCancel()}
-          destroyOnClose
-        >
-          <form style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <label style={{ width: 50 }}>标题：</label>
-            <Input
-              defaultValue={currentTag.name || ''}
-              onChange={e => this.inputValChange({ name: e.target.value })}
-            />
-          </form>
-        </Modal>
+        <Table />
       </PageHeaderWrapper>
     );
   }
 }
+
+export default Form.create()(Index);

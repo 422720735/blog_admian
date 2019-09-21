@@ -15,5 +15,5 @@ export function setCategory(params: {
   created?: number;
   updated?: number;
 }): request.PageRes<string> {
-  return http.post(`${host}/tagList/post`, params);
+  return http.post(`${host}/tag/post`, params);
 }

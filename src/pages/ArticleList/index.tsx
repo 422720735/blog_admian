@@ -2,6 +2,7 @@ import React from 'react';
 import { Select, Button, Input, message, Form } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
+import { getCategory } from '../Center/api'
 import Table from './Table';
 import httpStatus from '@/utils/http/returnCode';
 import { ArticleFollow } from '@/pages/ArticleList/interface';
@@ -12,6 +13,8 @@ interface State {
   loading: boolean;
   tagList: { id?: number; created?: number; updated?: number; name?: string }[];
 }
+
+
 class Index extends React.Component<ArticleFollow.ArticleType, State> {
   state: State = {
     loading: false,
@@ -26,7 +29,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     try {
       const { loading } = this.state;
       if (!loading) this.setState({ loading: true });
-      const response = await Api.getCategory();
+      const response = await getCategory();
       /**
        * 组装个全部
        * */
@@ -34,12 +37,24 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
         response.data.msg.unshift({ name: '全部', id: 0 });
       }
       const data = response.data.msg || [];
+      await this.getAllArticle({ id: 0, pageSize: 10, current: 1 });
       if (response.data.code === httpStatus.Ok) {
         this.setState({ tagList: data });
       } else {
         message.error(data);
       }
       this.setState({ loading: false });
+    } catch (e) {
+      message.error(e);
+    }
+  }
+
+  /**
+   * 查询分页数据
+   * */
+  async getAllArticle(params: ArticleFollow.ArticleList) {
+    try {
+      await Api.getArticleList(params);
     } catch (e) {
       message.error(e);
     }
@@ -103,5 +118,4 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     );
   }
 }
-
 export default Form.create()(Index);

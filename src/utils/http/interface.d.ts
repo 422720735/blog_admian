@@ -18,6 +18,29 @@ declare namespace request {
 
   interface ParseResult<T> extends AxiosResponse<ServerResponse<T>> {}
 
+  interface PageLimit<T> {
+    /**
+     * 总条数
+     */
+    readonly total: number;
+    /**
+     * 当前页
+     * */
+    readonly current: number;
+    /**
+     * 每页显示的条数
+     */
+    readonly pageSize: number;
+    /**
+     * 当前页返回的实际条数
+     */
+    readonly num: number;
+    /**
+     * 返回的数据
+     */
+    readonly data: T;
+  }
+
   /**
    * 没有分页的数据返回接口
    */
@@ -25,5 +48,5 @@ declare namespace request {
   /**
    * 分页接口
    */
-  type PageResLimit<T> = Promise<ParseResult<T>>;
+  type PageResLimit<T> = Promise<ParseResult<PageLimit<T>>>;
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { Select, Button, Input, message, Form } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
-import { getCategory } from '../Center/api'
+import { getCategory } from '../Center/api';
 import Table from './Table';
 import httpStatus from '@/utils/http/returnCode';
 import { ArticleFollow } from '@/pages/ArticleList/interface';
@@ -17,11 +17,10 @@ interface State {
     count: number;
     pageSize: number;
     total: number;
-    data: ArticleFollow.ArticleList[]
-  },
+    data: ArticleFollow.ArticleList[];
+  };
   articleType: number;
 }
-
 
 class Index extends React.Component<ArticleFollow.ArticleType, State> {
   state: State = {
@@ -72,18 +71,34 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
   // eslint-disable-next-line class-methods-use-this
   async getAllArticle(params: ArticleFollow.ArticleListQuery) {
     try {
-     const response = await Api.getArticleList(params);
-     const data = response.data || {};
-     if (data.code === httpStatus.Ok) {
-       this.setState({ ...{ list: data.msg } })
-     }
+      const response = await Api.getArticleList(params);
+      const data = response.data || {};
+      if (data.code === httpStatus.Ok) {
+        this.setState({ ...{ list: data.msg } });
+      }
     } catch (e) {
       message.error(e);
     }
   }
 
-  handleType = async (value) => {
-    console.log(value)
+  handleType = async (value: number) => {
+    const { list } = this.state;
+
+    await this.setState({ articleType: value });
+    await this.getAllArticle({
+      id: value,
+      pageSize: list.pageSize,
+      current: list.current,
+    });
+  };
+
+  async currentPage(current: number) {
+    const { articleType, list } = this.state;
+    await this.getAllArticle({
+      id: articleType,
+      pageSize: list.pageSize,
+      current,
+    });
   }
 
   render() {
@@ -92,6 +107,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     const {
       form: { getFieldDecorator },
     } = this.props;
+    console.log(list, 'list');
     return (
       <PageHeaderWrapper title={false}>
         <div
@@ -107,10 +123,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
                   initialValue: tagList.length > 0 ? tagList[0].id : '', // 这里可以设置一个初始值
                   rules: [{ required: true, message: '选项不能为空！' }],
                 })(
-                  <Select
-                    style={{ width: 200 }}
-                    onChange={this.handleType}
-                  >
+                  <Select style={{ width: 200 }} onChange={this.handleType}>
                     {tagList.length > 0
                       ? tagList.map(item => (
                           <Option value={item.id} key={item.id}>
@@ -142,7 +155,11 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
             添加
           </Button>
         </div>
-        <Table dataSource={list} articleType={articleType} />
+        <Table
+          dataSource={list}
+          articleType={articleType}
+          handlePage={(current: number) => this.currentPage(current)}
+        />
       </PageHeaderWrapper>
     );
   }

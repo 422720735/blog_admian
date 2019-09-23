@@ -16,6 +16,7 @@ declare namespace request {
     readonly time: number;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface ParseResult<T> extends AxiosResponse<ServerResponse<T>> {}
 
   interface PageLimit<T> {
@@ -31,10 +32,6 @@ declare namespace request {
      * 每页显示的条数
      */
     readonly pageSize: number;
-    /**
-     * 当前页返回的实际条数
-     */
-    readonly num: number;
     /**
      * 返回的数据
      */

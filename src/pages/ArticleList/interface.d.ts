@@ -5,10 +5,19 @@ declare namespace ArticleFollow {
     form: FormComponentProps['form'];
   }
 
-  interface ArticleList {
+  interface ArticleListQuery {
     name?: string;
     id: number;
     current: number;
     pageSize: number;
+  }
+
+  interface ArticleList {
+    id?: number;
+    title?: string;
+    isTop?: number;
+    created?: number;
+    updated?: number;
+    tags?: string | number;
   }
 }

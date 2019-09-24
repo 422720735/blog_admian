@@ -1,8 +1,7 @@
 import React from 'react';
-import { Popconfirm, Table, Pagination } from 'antd';
+import { Popconfirm, Table } from 'antd';
 import { ArticleFollow } from '@/pages/ArticleList/interface';
 import moment from 'moment';
-import * as Api from '../api';
 
 const { Column } = Table;
 
@@ -26,10 +25,7 @@ export default class Index extends React.Component<Props> {
   }
 
   handlePage = async (page: number) => {
-    // console.log(page);
     this.props.handlePage(page);
-    // const { dataSource, articleType } = this.props;
-    // await Api.getArticleList({ id: articleType, pageSize: dataSource.pageSize, current: page });
   };
 
   render() {
@@ -39,11 +35,13 @@ export default class Index extends React.Component<Props> {
       <div>
         <Table
           dataSource={data}
+          rowKey={record => `${record.id}`}
           pagination={{
             total: dataSource.total,
             current: dataSource.current,
             pageSize: dataSource.pageSize,
             onChange: this.handlePage,
+            showQuickJumper: true,
           }}
         >
           <Column title="标题" dataIndex="title" key="title" />
@@ -69,9 +67,21 @@ export default class Index extends React.Component<Props> {
           />
           <Column
             title="置顶"
-            render={(text, record) => <span>{text.isTop === 1 ? '普通' : '置顶'}</span>}
+            render={(text, record) => (
+              text.isTop === 1 ?
+                <Popconfirm title="当前数据是否需要置顶？" placement="rightTop" okText="Yes" cancelText="No">
+                  <a>普通</a>
+                </Popconfirm>
+                :
+                <Popconfirm title="当前数据是否需要修改为普通？" placement="rightTop" okText="Yes" cancelText="No">
+                  <a style={{ color: '#f5222d' }}>置顶</a>
+                </Popconfirm>
+            )}
           />
-          <Column title="点击量" dataIndex="c" key="c" />
+          <Column
+            title="点击量"
+            render={(text, record) => <span>{text.views}</span>}
+          />
           <Column
             title="操作"
             render={(text, record) => (
@@ -84,12 +94,6 @@ export default class Index extends React.Component<Props> {
             )}
           />
         </Table>
-        {/*<Pagination*/}
-        {/*  defaultCurrent={1}*/}
-        {/*  total={dataSource.total}*/}
-        {/*  pageSize={dataSource.pageSize}*/}
-        {/*  onChange={this.handlePage}*/}
-        {/*/>*/}
       </div>
     );
   }

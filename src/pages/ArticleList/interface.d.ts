@@ -10,6 +10,7 @@ declare namespace ArticleFollow {
     id: number;
     current: number;
     pageSize: number;
+    keyword: string;
   }
 
   interface ArticleList {

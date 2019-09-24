@@ -53,7 +53,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
         response.data.msg.unshift({ name: '全部', id: 0 });
       }
       const data = response.data.msg || [];
-      await this.getAllArticle({ id: 2, pageSize: 2, current: 1 });
+      await this.getAllArticle({ id: 0, pageSize: 10, current: 1, keyword: '2323' });
       if (response.data.code === httpStatus.Ok) {
         this.setState({ tagList: data });
       } else {
@@ -83,12 +83,12 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
 
   handleType = async (value: number) => {
     const { list } = this.state;
-
     await this.setState({ articleType: value });
     await this.getAllArticle({
       id: value,
       pageSize: list.pageSize,
       current: list.current,
+      keyword: '5',
     });
   };
 
@@ -98,6 +98,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
       id: articleType,
       pageSize: list.pageSize,
       current,
+      keyword: 'sdf',
     });
   }
 
@@ -107,7 +108,6 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     const {
       form: { getFieldDecorator },
     } = this.props;
-    console.log(list, 'list');
     return (
       <PageHeaderWrapper title={false}>
         <div
@@ -148,7 +148,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
           </Form>
           <Button
             onClick={() => {}}
-            style={{ marginBottom: '20px' }}
+            style={{ marginTop: '4px' }}
             type="primary"
             icon="plus-circle"
           >

@@ -20,6 +20,7 @@ interface State {
     data: ArticleFollow.ArticleList[];
   };
   articleType: number;
+  keyword: string;
 }
 
 class Index extends React.Component<ArticleFollow.ArticleType, State> {
@@ -27,6 +28,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     loading: false,
     tagList: [],
     articleType: 0,
+    keyword: '',
     list: {
       current: 1,
       pageSize: 10,
@@ -43,7 +45,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
   // eslint-disable-next-line react/sort-comp
   async initTag() {
     try {
-      const { loading } = this.state;
+      const { loading, keyword } = this.state;
       if (!loading) this.setState({ loading: true });
       const response = await getCategory();
       /**
@@ -53,7 +55,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
         response.data.msg.unshift({ name: '全部', id: 0 });
       }
       const data = response.data.msg || [];
-      await this.getAllArticle({ id: 0, pageSize: 10, current: 1, keyword: '2323' });
+      await this.getAllArticle({ id: 0, pageSize: 2, current: 1, keyword });
       if (response.data.code === httpStatus.Ok) {
         this.setState({ tagList: data });
       } else {
@@ -93,13 +95,28 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
   };
 
   async currentPage(current: number) {
-    const { articleType, list } = this.state;
+    const { articleType, list, keyword } = this.state;
     await this.getAllArticle({
       id: articleType,
       pageSize: list.pageSize,
+      keyword,
       current,
-      keyword: 'sdf',
     });
+    this.setState({ list: { ...list, current } });
+  }
+
+  async handlePage() {
+    const { list, articleType, keyword } = this.state;
+    await this.getAllArticle({
+      id: articleType,
+      pageSize: list.pageSize,
+      current: list.current,
+      keyword,
+    });
+  }
+
+  handleKeyword(keyword: { keyword: string }) {
+    this.setState({ ...keyword });
   }
 
   render() {
@@ -135,23 +152,25 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
                 )}
             </Form.Item>
             <Form.Item>
-              <Input
-                placeholder="请输入要搜索标题"
-                style={{ width: 200, marginLeft: 10, marginRight: 10 }}
-              />
+              {tagList.length > 0 &&
+                getFieldDecorator('keyword', {
+                  initialValue: '', // 这里可以设置一个初始值
+                  rules: [{ required: true, message: '选项不能为空！' }],
+                })(
+                  <Input
+                    placeholder="请输入要搜索标题"
+                    style={{ width: 200, marginLeft: 10, marginRight: 10 }}
+                    onChange={(e: any) => this.handleKeyword({ keyword: e.target.value })}
+                  />,
+                )}
             </Form.Item>
             <Form.Item>
-              <Button type="primary" loading={loading}>
+              <Button type="primary" loading={loading} onClick={() => this.handlePage()}>
                 搜索
               </Button>
             </Form.Item>
           </Form>
-          <Button
-            onClick={() => {}}
-            style={{ marginTop: '4px' }}
-            type="primary"
-            icon="plus-circle"
-          >
+          <Button onClick={() => {}} style={{ marginTop: '4px' }} type="primary" icon="plus-circle">
             添加
           </Button>
         </div>

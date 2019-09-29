@@ -136,7 +136,12 @@ export default {
                   path: '/center/article',
                   name: 'article',
                   component: './ArticleList',
-                }
+                },
+                {
+                  path: '/center/details',
+                  name: 'details',
+                  component: './Details',
+                },
               ],
             },
             {

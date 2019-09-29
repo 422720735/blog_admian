@@ -4,6 +4,7 @@ export default {
   'menu.center': '内容管理',
   'menu.center.type': '分类管理',
   'menu.center.article': '博文列表',
+  'menu.center.details': '博文详情',
   'menu.more-blocks': '更多区块',
   'menu.home': '首页',
   'menu.login': '登录',

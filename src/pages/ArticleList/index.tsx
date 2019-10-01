@@ -45,7 +45,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
   // eslint-disable-next-line react/sort-comp
   async initTag() {
     try {
-      const { loading, keyword } = this.state;
+      const { loading, keyword, list } = this.state;
       if (!loading) this.setState({ loading: true });
       const response = await getCategory();
       /**
@@ -55,7 +55,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
         response.data.msg.unshift({ name: '全部', id: 0 });
       }
       const data = response.data.msg || [];
-      await this.getAllArticle({ id: 0, pageSize: 2, current: 1, keyword });
+      await this.getAllArticle({ id: 0, pageSize: list.pageSize, current: 1, keyword });
       if (response.data.code === httpStatus.Ok) {
         this.setState({ tagList: data });
       } else {
@@ -84,13 +84,13 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
   }
 
   handleType = async (value: number) => {
-    const { list } = this.state;
+    const { list, keyword } = this.state;
     await this.setState({ articleType: value });
     await this.getAllArticle({
-      id: value,
       pageSize: list.pageSize,
       current: list.current,
-      keyword: '5',
+      id: value,
+      keyword,
     });
   };
 
@@ -176,6 +176,7 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
         </div>
         <Table
           dataSource={list}
+          tags={tagList}
           articleType={articleType}
           handlePage={(current: number) => this.currentPage(current)}
         />

@@ -12,6 +12,9 @@ import LoginComponents from './components/Login';
 import styles from './style.less';
 import { LoginParamsType } from '@/services/login';
 import { ConnectState } from '@/models/connect';
+import * as Api from './api';
+import httpStatus from '@/utils/http/returnCode';
+import { message } from 'antd/es';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginComponents;
 
@@ -43,18 +46,33 @@ class Login extends Component<LoginProps, LoginState> {
     });
   };
 
-  handleSubmit = (err: unknown, values: LoginParamsType) => {
-    const { type } = this.state;
-    if (!err) {
-      const { dispatch } = this.props;
-      dispatch({
-        type: 'login/login',
-        payload: {
-          ...values,
-          type,
-        },
-      });
+  /***
+   * 发起登录请求
+   * @param err
+   * @param values
+   */
+  handleSubmit = async (err: unknown, values: LoginParamsType) => {
+    try {
+      const response = await Api.handleLogin({ username: 'admin', password: '123456' });
+      if (response.data.code === httpStatus.Ok) {
+        message.success(response.data.msg);
+      } else {
+        message.error(response.data.msg);
+      }
+    } catch (e) {
+      message.error(e)
     }
+    // const { type } = this.state;
+    // if (!err) {
+    //   const { dispatch } = this.props;
+    //   dispatch({
+    //     type: 'login/login',
+    //     payload: {
+    //       ...values,
+    //       type,
+    //     },
+    //   });
+    // }
   };
 
   onTabChange = (type: string) => {

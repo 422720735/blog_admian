@@ -61,19 +61,23 @@ export default class Index extends React.Component<State> {
    * 添加编辑模态框
    * */
   async handleAddUpdate() {
-    const { currentTag } = this.state;
-    const response = await Api.setCategory(currentTag);
-    if (response.data.code === httpStatus.Ok) {
-      message.success(response.data.msg);
-      await this.initTag()
-    } else {
-      message.error(response.data.msg);
-    }
-    const { visible } = this.state;
-    await this.setState({
-      visible: !visible,
-      currentTag: {},
-    });
+   try {
+     const { currentTag } = this.state;
+     const response = await Api.setCategory(currentTag);
+     if (response.data.code === httpStatus.Ok) {
+       message.success(response.data.msg);
+       await this.initTag()
+     } else {
+       message.error(response.data.msg);
+     }
+     const { visible } = this.state;
+     await this.setState({
+       visible: !visible,
+       currentTag: {},
+     });
+   } catch (e) {
+     message.error(e);
+   }
   }
 
   handleUpdate(text: { id?: number; name?: string; created?: number; updated?: number }) {
@@ -110,8 +114,17 @@ export default class Index extends React.Component<State> {
    * @param id
    */
   async confirm(id: number) {
-    await Api.handleDelTag(id);
-    message.success('Click on Yes');
+    try {
+      const response = await Api.handleDelTag(id);
+      if (response.data.code === httpStatus.Ok) {
+        await this.initTag();
+        message.success(response.data.msg);
+      } else {
+        message.error(response.data.msg);
+      }
+    } catch (e) {
+      message.error(e)
+    }
   }
 
   cancel() {

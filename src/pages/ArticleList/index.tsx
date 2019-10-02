@@ -1,11 +1,12 @@
 import React from 'react';
-import { Select, Button, Input, message, Form } from 'antd';
+import { Card, Select, Button, Input, message, Form } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
 import { getCategory } from '../Center/api';
 import Table from './Table';
 import httpStatus from '@/utils/http/returnCode';
 import { ArticleFollow } from '@/pages/ArticleList/interface';
+import router from 'umi/router';
 
 const { Option } = Select;
 
@@ -125,17 +126,19 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     const {
       form: { getFieldDecorator },
     } = this.props;
+    console.log(this.props,'props')
     return (
       <PageHeaderWrapper title={false}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Form style={{ display: 'flex' }}>
-            <Form.Item>
-              {tagList.length > 0 &&
+        <Card>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Form style={{ display: 'flex' }}>
+              <Form.Item>
+                {tagList.length > 0 &&
                 getFieldDecorator('select', {
                   initialValue: tagList.length > 0 ? tagList[0].id : '', // 这里可以设置一个初始值
                   rules: [{ required: true, message: '选项不能为空！' }],
@@ -143,16 +146,16 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
                   <Select style={{ width: 200 }} onChange={this.handleType}>
                     {tagList.length > 0
                       ? tagList.map(item => (
-                          <Option value={item.id} key={item.id}>
-                            {item.name}
-                          </Option>
-                        ))
+                        <Option value={item.id} key={item.id}>
+                          {item.name}
+                        </Option>
+                      ))
                       : null}
                   </Select>,
                 )}
-            </Form.Item>
-            <Form.Item>
-              {tagList.length > 0 &&
+              </Form.Item>
+              <Form.Item>
+                {tagList.length > 0 &&
                 getFieldDecorator('keyword', {
                   initialValue: '', // 这里可以设置一个初始值
                   rules: [{ required: true, message: '选项不能为空！' }],
@@ -163,23 +166,24 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
                     onChange={(e: any) => this.handleKeyword({ keyword: e.target.value })}
                   />,
                 )}
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" loading={loading} onClick={() => this.handlePage()}>
-                搜索
-              </Button>
-            </Form.Item>
-          </Form>
-          <Button onClick={() => {}} style={{ marginTop: '4px' }} type="primary" icon="plus-circle">
-            添加
-          </Button>
-        </div>
-        <Table
-          dataSource={list}
-          tags={tagList}
-          articleType={articleType}
-          handlePage={(current: number) => this.currentPage(current)}
-        />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" loading={loading} onClick={() => this.handlePage()}>
+                  搜索
+                </Button>
+              </Form.Item>
+            </Form>
+            <Button onClick={() => router.push('/center/details')} style={{ marginTop: '4px' }} type="primary" icon="plus-circle">
+              添加
+            </Button>
+          </div>
+          <Table
+            dataSource={list}
+            tags={tagList}
+            articleType={articleType}
+            handlePage={(current: number) => this.currentPage(current)}
+          />
+        </Card>
       </PageHeaderWrapper>
     );
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { message, Table, Button, Modal, Input, Popconfirm } from 'antd';
+import { Card, message, Table, Button, Modal, Input, Popconfirm } from 'antd';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
@@ -105,64 +105,85 @@ export default class Index extends React.Component<State> {
     })
   }
 
+  /**
+   * 进行软删除
+   * @param id
+   */
+  async confirm(id: number) {
+    await Api.handleDelTag(id);
+    message.success('Click on Yes');
+  }
+
+  cancel() {
+    message.error('Click on No');
+  }
+
   render() {
     const { loading } = this.props;
     const { tagList, visible, currentTag } = this.state;
     return (
       <PageHeaderWrapper title={false}>
-        <Button
-          onClick={() => this.setState({ visible: !visible })}
-          style={{ marginBottom: '20px' }}
-          type="primary"
-          icon="plus-circle"
-        >
-          添加
-        </Button>
-        <Table
-          loading={loading}
-          dataSource={tagList}
-          rowKey="id"
-        >
-          <Column title="名称" dataIndex="name" key="name" />
-          <Column
-            title="添加时间"
-            dataIndex="created"
-            key="created"
-            render={(text, record) => <span>{ text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
-          />
-          <Column
-            title="修改时间"
-            dataIndex="updated"
-            key="updated"
-            render={(text, record) => <span>{text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
-          />
-          <Column
-            title="操作"
-            render={(text, record) => (
-              <span>
-                <a onClick={() => this.handleUpdate(text)}>编辑</a>&emsp;|&emsp;
-                <Popconfirm title="确定要删除吗？" okText="Yes" cancelText="No">
-                  <a>删除</a>
-                </Popconfirm>
-              </span>
-            )}
-          />
-        </Table>
-        <Modal
-          title={Object.keys(currentTag).length > 0 ? '编辑' : '新增'}
-          visible={visible}
-          onOk={() => this.handleAddUpdate()}
-          onCancel={() => this.handleCancel()}
-          destroyOnClose
-        >
-          <form style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <label style={{ width: 50 }}>标题：</label>
-            <Input
-              defaultValue={currentTag.name || ''}
-              onChange={e => this.inputValChange({ name: e.target.value })}
+        <Card>
+          <Button
+            onClick={() => this.setState({ visible: !visible })}
+            style={{ marginBottom: '20px' }}
+            type="primary"
+            icon="plus-circle"
+          >
+            添加
+          </Button>
+          <Table
+            loading={loading}
+            dataSource={tagList}
+            rowKey="id"
+          >
+            <Column title="名称" dataIndex="name" key="name" />
+            <Column
+              title="添加时间"
+              dataIndex="created"
+              key="created"
+              render={(text, record) => <span>{ text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
             />
-          </form>
-        </Modal>
+            <Column
+              title="修改时间"
+              dataIndex="updated"
+              key="updated"
+              render={(text, record) => <span>{text ? moment(text * 1000).format('YYYY-MM-DD HH:mm:ss') : '--'}</span>}
+            />
+            <Column
+              title="操作"
+              render={(text, record) => (
+                <span>
+                <a onClick={() => this.handleUpdate(text)}>编辑</a>&emsp;|&emsp;
+                  <Popconfirm
+                    title="确定要删除吗？"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => this.confirm(text.id)}
+                    onCancel={() => this.cancel()}
+                  >
+                    <a>删除</a>
+                  </Popconfirm>
+              </span>
+              )}
+            />
+          </Table>
+          <Modal
+            title={Object.keys(currentTag).length > 0 ? '编辑' : '新增'}
+            visible={visible}
+            onOk={() => this.handleAddUpdate()}
+            onCancel={() => this.handleCancel()}
+            destroyOnClose
+          >
+            <form style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              <label style={{ width: 50 }}>标题：</label>
+              <Input
+                defaultValue={currentTag.name || ''}
+                onChange={e => this.inputValChange({ name: e.target.value })}
+              />
+            </form>
+          </Modal>
+        </Card>
       </PageHeaderWrapper>
     );
   }

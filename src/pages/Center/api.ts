@@ -17,3 +17,7 @@ export function setCategory(params: {
 }): request.PageRes<string> {
   return http.post(`${host}/tag/post`, params);
 }
+
+export function handleDelTag(id: number) {
+  return http.get(`${host}/tag/del`, { params: { id } })
+}

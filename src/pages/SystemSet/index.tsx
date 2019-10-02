@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Card, Form, Input, Button, message } from 'antd';
 import { SystemSetFollow } from '@/pages/SystemSet/interface';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import * as Api from './api';
@@ -77,75 +77,76 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
     };
     return (
       <PageHeaderWrapper title={false}>
-        <Form {...formItemLayout} onClick={() => this.handleSystem()}>
-          <Form.Item label="标题：" hasFeedback>
-            {getFieldDecorator('title', {
-              initialValue: system.title || '',
-              rules: [
-                {
-                  required: true,
-                  message: '必填项不能为空!',
-                },
-              ],
-            })(<Input/>)}
-          </Form.Item>
-          <Form.Item label="网址：" hasFeedback>
-            {getFieldDecorator('url', {
-              initialValue: system.url || '',
-              rules: [
-                {
-                  required: true,
-                  message: '必填项不能为空!',
-                },
-              ],
-            })(<Input/>)}
-          </Form.Item>
-          <Form.Item label="关键字：" hasFeedback>
-            {getFieldDecorator('keywords', {
-              initialValue: system.keywords || '',
-              rules: [
-                {
-                  required: true,
-                  message: '必填项不能为空!',
-                },
-              ],
-            })(<Input/>)}
-          </Form.Item>
-          <Form.Item label="描述：" hasFeedback>
-            {getFieldDecorator('description', {
-              initialValue: system.description || '',
-              rules: [
-                {
-                  required: true,
-                  message: '必填项不能为空!',
-                },
-              ],
-            })(<Input/>)}
-          </Form.Item>
-          <Form.Item label="邮箱：" hasFeedback>
-            {getFieldDecorator('email', {
-              initialValue: system.email || '',
-              rules: [
-                {
-                  required: true,
-                  type: 'email',
-                  message: '必填项不能为空!',
-                },
-              ],
-            })(<Input/>)}
-          </Form.Item>
-          <Form.Item label="QQ：" hasFeedback>
-            {getFieldDecorator('qq', {
-              initialValue: system.qq || '',
-              rules: [
-                {
-                  required: true,
-                  message: '必填项不能为空!',
-                },
-              ],
-            })(<Input/>)}
-          </Form.Item>
-          {/*
+        <Card>
+          <Form {...formItemLayout} onClick={() => this.handleSystem()}>
+            <Form.Item label="标题：" hasFeedback>
+              {getFieldDecorator('title', {
+                initialValue: system.title || '',
+                rules: [
+                  {
+                    required: true,
+                    message: '必填项不能为空!',
+                  },
+                ],
+              })(<Input/>)}
+            </Form.Item>
+            <Form.Item label="网址：" hasFeedback>
+              {getFieldDecorator('url', {
+                initialValue: system.url || '',
+                rules: [
+                  {
+                    required: true,
+                    message: '必填项不能为空!',
+                  },
+                ],
+              })(<Input/>)}
+            </Form.Item>
+            <Form.Item label="关键字：" hasFeedback>
+              {getFieldDecorator('keywords', {
+                initialValue: system.keywords || '',
+                rules: [
+                  {
+                    required: true,
+                    message: '必填项不能为空!',
+                  },
+                ],
+              })(<Input/>)}
+            </Form.Item>
+            <Form.Item label="描述：" hasFeedback>
+              {getFieldDecorator('description', {
+                initialValue: system.description || '',
+                rules: [
+                  {
+                    required: true,
+                    message: '必填项不能为空!',
+                  },
+                ],
+              })(<Input/>)}
+            </Form.Item>
+            <Form.Item label="邮箱：" hasFeedback>
+              {getFieldDecorator('email', {
+                initialValue: system.email || '',
+                rules: [
+                  {
+                    required: true,
+                    type: 'email',
+                    message: '必填项不能为空!',
+                  },
+                ],
+              })(<Input/>)}
+            </Form.Item>
+            <Form.Item label="QQ：" hasFeedback>
+              {getFieldDecorator('qq', {
+                initialValue: system.qq || '',
+                rules: [
+                  {
+                    required: true,
+                    message: '必填项不能为空!',
+                  },
+                ],
+              })(<Input/>)}
+            </Form.Item>
+            {/*
           <Form.Item label="开关：">
             {getFieldDecorator('start', {
               initialValue: system.start || '',
@@ -158,12 +159,13 @@ class SystemSet extends React.Component<SystemSetFollow.SystemForm> {
             )}
           </Form.Item>
           */}
-          <Form.Item wrapperCol={{ span: 12, offset: 3 }}>
-            <Button type="primary" htmlType="submit">
-              提交
-            </Button>
-          </Form.Item>
-        </Form>
+            <Form.Item wrapperCol={{ span: 12, offset: 3 }}>
+              <Button type="primary" htmlType="submit">
+                提交
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
       </PageHeaderWrapper>
     );
   }

@@ -46,14 +46,14 @@ class Login extends Component<LoginProps, LoginState> {
     });
   };
 
-  /***
+  /** *
    * 发起登录请求
    * @param err
    * @param values
    */
   handleSubmit = async (err: unknown, values: LoginParamsType) => {
     try {
-      const response = await Api.handleLogin({ username: 'admin', password: '123456' });
+      const response = await Api.handleLogin({ username: values.userName, password: values.password });
       if (response.data.code === httpStatus.Ok) {
         message.success(response.data.msg);
       } else {

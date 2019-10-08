@@ -18,6 +18,8 @@ import { getCategory } from '../Center/api';
 import httpStatus from '@/utils/http/returnCode';
 import Style from './style.less';
 import Editor from './Editor';
+import { RcFile, UploadChangeParam } from 'antd/es/upload';
+import { UploadFile } from 'antd/es/upload/interface';
 
 const { Option } = Select;
 
@@ -31,10 +33,11 @@ interface State {
   // 照片墙
   previewVisible: boolean;
   previewImage: string;
-  fileList: {uid: string; name: string; status: string; url: string;}[]
+  fileList: {uid: string; name: string; status: string; url: string;}[],
+  fileData: any[],
 }
 
-function getBase64(file) {
+function getBase64(file: any) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -47,7 +50,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
   state: State = {
     tagList: [],
     checked: false,
-    tags: ['Unremovable', 'Tag 2', 'Tag 3'],
+    tags: [],
     inputVisible: false,
     inputValue: '',
 
@@ -60,19 +63,8 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
         status: 'done',
         url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
       },
-      {
-        uid: '-2',
-        name: 'image.png',
-        status: 'done',
-        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-      },
-      {
-        uid: '-3',
-        name: 'image.png',
-        status: 'done',
-        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-      },
     ],
+    fileData: [],
   };
 
   async componentDidMount() {
@@ -130,26 +122,23 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     });
   };
 
-  saveInputRef = input => (this.input = input);
+  saveInputRef = (input: any) => (this.input = input);
 
-  /***
-   * ^标签结束
-   */
+  // 这个是监听文件变化的
+  fileChange = (params: UploadChangeParam) => {
+    console.log(params)
+  }
 
-  handleCancel = () => this.setState({ previewVisible: false });
+  // 拦截文件上传
+  beforeUploadHandle=(file: RcFile) => {
+    console.log(file)
+  }
 
-  handlePreview = async file => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
-    }
+  // 文件列表的删除
+  fileRemove=(file: UploadFile) => {
+    console.log(file)
+  }
 
-    this.setState({
-      previewImage: file.url || file.preview,
-      previewVisible: true,
-    });
-  };
-
-  handleChange = ({ fileList }) => this.setState({ fileList });
 
   render() {
     const formItemLayout = {
@@ -164,13 +153,6 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     const { tags, inputVisible, inputValue } = this.state;
 
     const { previewVisible, previewImage, fileList } = this.state;
-
-    const uploadButton = (
-      <div>
-        <Icon type="plus" />
-        <div className="ant-upload-text">Upload</div>
-      </div>
-    );
 
     return (
       <PageHeaderWrapper title={false}>
@@ -205,6 +187,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                 </Select>,
               )}
             </Form.Item>
+
             <Form.Item label="加入首页">
               <Checkbox
                 className={!checked && Style.NO}
@@ -212,6 +195,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                 onChange={() => this.handleIsTop()}
               >置首</Checkbox>
             </Form.Item>
+
             <Form.Item label="链接">
               {getFieldDecorator('title', {
                 initialValue: '',
@@ -223,6 +207,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                 ],
               })(<Input/>)}
             </Form.Item>
+
             <Form.Item label="标签">
               {tags.map((tag, index) => {
                 const isLongTag = tag.length > 20;
@@ -259,17 +244,26 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             </Form.Item>
 
             <Form.Item label="图片">
-
               <Upload
-                action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                accept="image/*"
+                action="http://localhost:4000/api/admin/v2/fileuplaod"
                 listType="picture-card"
-                fileList={fileList}
-                onPreview={this.handlePreview}
-                onChange={this.handleChange}
+                beforeUpload={this.beforeUploadHandle}
+                onChange={this.fileChange}
+                onRemove={this.fileRemove}
               >
-                {fileList.length >= 8 ? null : uploadButton}
+                {fileList.length >= 8 ? null : (
+                  <div>
+                    <Icon type="plus" />
+                    <div className="ant-upload-text">Upload</div>
+                  </div>
+                )}
               </Upload>
-              <Modal visible={previewVisible} footer={null} onCancel={this.handleCancel}>
+              <Modal
+                visible={previewVisible}
+                footer={null}
+                onCancel={() => this.setState({ previewVisible: false })}
+              >
                 <img alt="example" style={{ width: '100%' }} src={previewImage} />
               </Modal>
             </Form.Item>

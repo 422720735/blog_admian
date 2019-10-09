@@ -110,6 +110,10 @@ class Login extends Component<LoginProps, LoginState> {
     <Alert style={{ marginBottom: 24 }} message={content} type="error" showIcon />
   );
 
+  private f() {
+    Api.test()
+  }
+
   render() {
     const { userLogin, submitting } = this.props;
     const { status, type: loginType } = userLogin;
@@ -124,6 +128,7 @@ class Login extends Component<LoginProps, LoginState> {
             this.loginForm = form;
           }}
         >
+          <div onClick={() => this.f()}>146146</div>
           <Tab key="account" tab={formatMessage({ id: 'user-login.login.tab-login-credentials' })}>
             {status === 'error' &&
               loginType === 'account' &&

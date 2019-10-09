@@ -126,7 +126,6 @@ class Index extends React.Component<ArticleFollow.ArticleType, State> {
     const {
       form: { getFieldDecorator },
     } = this.props;
-    console.log(this.props,'props')
     return (
       <PageHeaderWrapper title={false}>
         <Card>

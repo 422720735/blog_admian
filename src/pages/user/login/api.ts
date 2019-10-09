@@ -6,3 +6,7 @@ import host from '@/utils/http/HOST';
 export function handleLogin(params: { username: string; password: string;}) {
   return http.post(`${host.replace('/v2', '')}/login`, { ...params });
 }
+
+export function test() {
+  return http.get(`${host}/auth/verify`)
+}

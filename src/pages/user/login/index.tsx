@@ -15,6 +15,8 @@ import { ConnectState } from '@/models/connect';
 import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
 import { message } from 'antd/es';
+import router from 'umi/router';
+
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginComponents;
 const Token = 'GOBUILD_TOKEN';
@@ -56,8 +58,8 @@ class Login extends Component<LoginProps, LoginState> {
     try {
       const response = await Api.handleLogin({ username: values.userName, password: values.password });
       if (response.data.code === httpStatus.Ok) {
-        message.success(response.data.msg);
-        sessionStorage.setItem(Token, response.data.msg);
+        await sessionStorage.setItem(Token, response.data.msg);
+        await router.push('/')
       } else {
         message.error(response.data.msg);
       }

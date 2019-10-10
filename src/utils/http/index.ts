@@ -1,5 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { request } from '@/utils/http/interface';
+import httpStatus from '@/utils/http/returnCode';
+import router from 'umi/router';
+import {message} from "antd";
 
 const Token = 'GOBUILD_TOKEN';
 axios.interceptors.request.use(async (config: AxiosRequestConfig) => {
@@ -10,7 +13,13 @@ axios.interceptors.request.use(async (config: AxiosRequestConfig) => {
   return config;
 });
 
-axios.interceptors.response.use(async (res) => res);
+axios.interceptors.response.use(async (res: any) => {
+  if (res.data.code === httpStatus.RESTRICT) {
+    await message.error('请重新登陆，访问已到期！');
+    await router.push('/user/login')
+  }
+  return res
+});
 
 // @ts-ignore
 export function get<T>(req: string, config: any = {}): Promise<request.ParseResult> {

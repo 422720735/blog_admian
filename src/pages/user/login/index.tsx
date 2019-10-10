@@ -17,6 +17,7 @@ import httpStatus from '@/utils/http/returnCode';
 import { message } from 'antd/es';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginComponents;
+const Token = 'GOBUILD_TOKEN';
 
 interface LoginProps {
   dispatch: Dispatch<AnyAction>;
@@ -56,6 +57,7 @@ class Login extends Component<LoginProps, LoginState> {
       const response = await Api.handleLogin({ username: values.userName, password: values.password });
       if (response.data.code === httpStatus.Ok) {
         message.success(response.data.msg);
+        sessionStorage.setItem(Token, response.data.msg);
       } else {
         message.error(response.data.msg);
       }

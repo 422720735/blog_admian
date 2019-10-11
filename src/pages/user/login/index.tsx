@@ -16,10 +16,9 @@ import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
 import { message } from 'antd/es';
 import router from 'umi/router';
-
+import { globalFixed } from '@/globallEnum/keyCommon';
 
 const { Tab, UserName, Password, Mobile, Captcha, Submit } = LoginComponents;
-const Token = 'GOBUILD_TOKEN';
 
 interface LoginProps {
   dispatch: Dispatch<AnyAction>;
@@ -56,9 +55,12 @@ class Login extends Component<LoginProps, LoginState> {
    */
   handleSubmit = async (err: unknown, values: LoginParamsType) => {
     try {
-      const response = await Api.handleLogin({ username: values.userName, password: values.password });
+      const response = await Api.handleLogin({
+        username: values.userName,
+        password: values.password,
+      });
       if (response.data.code === httpStatus.Ok) {
-        await sessionStorage.setItem(Token, response.data.msg);
+        await sessionStorage.setItem(globalFixed.TOKEN_ID, response.data.msg);
         await router.push('/')
       } else {
         message.error(response.data.msg);
@@ -66,17 +68,6 @@ class Login extends Component<LoginProps, LoginState> {
     } catch (e) {
       message.error(e)
     }
-    // const { type } = this.state;
-    // if (!err) {
-    //   const { dispatch } = this.props;
-    //   dispatch({
-    //     type: 'login/login',
-    //     payload: {
-    //       ...values,
-    //       type,
-    //     },
-    //   });
-    // }
   };
 
   onTabChange = (type: string) => {
@@ -114,10 +105,6 @@ class Login extends Component<LoginProps, LoginState> {
     <Alert style={{ marginBottom: 24 }} message={content} type="error" showIcon />
   );
 
-  private f() {
-    Api.test()
-  }
-
   render() {
     const { userLogin, submitting } = this.props;
     const { status, type: loginType } = userLogin;
@@ -132,7 +119,6 @@ class Login extends Component<LoginProps, LoginState> {
             this.loginForm = form;
           }}
         >
-          <div onClick={() => this.f()}>146146</div>
           <Tab key="account" tab={formatMessage({ id: 'user-login.login.tab-login-credentials' })}>
             {status === 'error' &&
               loginType === 'account' &&

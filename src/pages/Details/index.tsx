@@ -10,11 +10,13 @@ import {
   Tooltip,
   Icon,
   Upload,
-  Modal,
+  Modal, Button,
 } from 'antd';
+
 import { DetailsFollow } from '@/pages/Details/interface';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { getCategory } from '../Center/api';
+import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
 import Style from './style.less';
 import Editor from './Editor';
@@ -33,17 +35,7 @@ interface State {
   // 照片墙
   previewVisible: boolean;
   previewImage: string;
-  fileList: {uid: string; name: string; status: string; url: string;}[],
   fileData: any[],
-}
-
-function getBase64(file: any) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
 }
 
 class Details extends React.Component<DetailsFollow.DetailsForm, State> {
@@ -53,25 +45,87 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     tags: [],
     inputVisible: false,
     inputValue: '',
-
     previewVisible: false,
     previewImage: '',
-    fileList: [
-      {
-        uid: '-1',
-        name: 'image.png',
-        status: 'done',
-        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-      },
-    ],
     fileData: [],
   };
 
-  async componentDidMount() {
-    await this.initTag();
+  private input: any;
+
+  private handleIsTop() {
+    const { checked } = this.state;
+    this.setState({ checked: !checked })
   }
 
-  async initTag() {
+  /** *
+   * 标签部分
+   * @param removedTag
+   */
+    // eslint-disable-next-line react/sort-comp
+  handleClose = (removedTag: any) => {
+    // eslint-disable-next-line react/no-access-state-in-setstate
+    const tags = this.state.tags.filter(tag => tag !== removedTag);
+    this.setState({ tags });
+  };
+
+  showInput = () => {
+    this.setState({ inputVisible: true }, () => this.input.focus());
+  };
+
+  handleInputChange = (e: { target: { value: string; }; }) => {
+    this.setState({ inputValue: e.target.value });
+  };
+
+  handleInputConfirm = () => {
+    const { inputValue } = this.state;
+    let { tags } = this.state;
+    if (inputValue && tags.indexOf(inputValue) === -1) {
+      tags = [...tags, inputValue];
+    }
+    this.setState({
+      tags,
+      inputVisible: false,
+      inputValue: '',
+    });
+  };
+
+  // eslint-disable-next-line no-return-assign
+  saveInputRef = (input: any) => (this.input = input);
+
+  // 这个是监听文件变化的
+  fileChange = (params: UploadChangeParam) => {
+    console.log(params)
+  }
+
+  // 拦截文件上传
+  beforeUploadHandle = (file: RcFile) => {
+    /**
+     * 上传文件之前的钩子，
+     * 参数为上传的文件，若返回 false 则停止上传。
+     * 支持返回一个 Promise 对象，Promise 对象 reject 时则停止上传，
+     * resolve 时开始上传（ resolve 传入 File 或 Blob 对象则上传 resolve 传入对象）。注意：IE9 不支持该方法。
+     */
+    console.log(file, '文件')
+    if (file.size > 1024 * 1024 * 3) {
+      message.error('你上传的文件过大，请重新上传');
+    }
+    this.setState(({ fileData }) => ({
+      fileData: [...fileData, file],
+    }));
+    return false
+  }
+
+  // 文件列表的删除
+  fileRemove = (file: UploadFile) => {
+    this.setState(({ fileData }) => {
+      const index = fileData.indexOf(file);
+      return {
+        fileData: fileData.filter((_, i) => i !== index),
+      }
+    })
+  }
+
+  async componentDidMount() {
     try {
       const response = await getCategory();
       const data = response.data.msg || [];
@@ -85,74 +139,68 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     }
   }
 
-  private handleIsTop() {
-    const { checked } = this.state;
-    this.setState({ checked: !checked })
-  }
-
-  /***
-   * 标签部分
-   * @param removedTag
-   */
-  handleClose = removedTag => {
-    const tags = this.state.tags.filter(tag => tag !== removedTag);
-    console.log(tags);
-    this.setState({ tags });
-  };
-
-  showInput = () => {
-    this.setState({ inputVisible: true }, () => this.input.focus());
-  };
-
-  handleInputChange = e => {
-    this.setState({ inputValue: e.target.value });
-  };
-
-  handleInputConfirm = () => {
-    const { inputValue } = this.state;
-    let { tags } = this.state;
-    if (inputValue && tags.indexOf(inputValue) === -1) {
-      tags = [...tags, inputValue];
+  async uploadProps() {
+    const { fileData } = this.state;
+    const UpImg = new FormData();
+    UpImg.append('file', fileData[0]);
+    try {
+      const response = await Api.uploadFormData(UpImg);
+      if (response.data.code != httpStatus.Ok) {
+        message.success('图片上传成功')
+      } else {
+        message.error(response.data.msg);
+        this.setState({ fileData: [] });
+      }
+    } catch (e) {
+      message.error(e)
     }
-    console.log(tags);
-    this.setState({
-      tags,
-      inputVisible: false,
-      inputValue: '',
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private getBase64(file: any) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
     });
-  };
-
-  saveInputRef = (input: any) => (this.input = input);
-
-  // 这个是监听文件变化的
-  fileChange = (params: UploadChangeParam) => {
-    console.log(params)
   }
 
-  // 拦截文件上传
-  beforeUploadHandle=(file: RcFile) => {
-    console.log(file)
-  }
+  handlePreview = async (file: any) => {
+    if (!file.url && !file.preview) {
+      file.preview = await this.getBase64(file.originFileObj);
+    }
 
-  // 文件列表的删除
-  fileRemove=(file: UploadFile) => {
-    console.log(file)
+    this.setState({
+      previewImage: file.url || file.preview,
+      previewVisible: true,
+    });
   }
-
 
   render() {
     const formItemLayout = {
       labelCol: { span: 3 },
       wrapperCol: { span: 21 },
     };
-
     const { form } = this.props;
     const { getFieldDecorator } = form;
-    const { tagList, checked } = this.state;
+    const {
+      tags,
+      inputVisible,
+      inputValue,
+      previewVisible,
+      previewImage,
+      tagList,
+      checked,
+      fileData,
+    } = this.state;
 
-    const { tags, inputVisible, inputValue } = this.state;
-
-    const { previewVisible, previewImage, fileList } = this.state;
+    const uploadButton = (
+      <div>
+        <Icon type="plus" />
+        <div className="ant-upload-text">Upload</div>
+      </div>
+    )
 
     return (
       <PageHeaderWrapper title={false}>
@@ -209,10 +257,14 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             </Form.Item>
 
             <Form.Item label="标签">
-              {tags.map((tag, index) => {
+              {tags.map((tag) => {
                 const isLongTag = tag.length > 20;
                 const tagElem = (
-                  <Tag key={tag} closable={index !== 0} onClose={() => this.handleClose(tag)}>
+                  <Tag
+                    key={tag}
+                    closable
+                    onClose={() => this.handleClose(tag)}
+                  >
                     {isLongTag ? `${tag.slice(0, 20)}...` : tag}
                   </Tag>
                 );
@@ -249,15 +301,11 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                 action="http://localhost:4000/api/admin/v2/fileuplaod"
                 listType="picture-card"
                 beforeUpload={this.beforeUploadHandle}
+                onPreview={this.handlePreview}
                 onChange={this.fileChange}
                 onRemove={this.fileRemove}
               >
-                {fileList.length >= 8 ? null : (
-                  <div>
-                    <Icon type="plus" />
-                    <div className="ant-upload-text">Upload</div>
-                  </div>
-                )}
+                { fileData.length >= 8 ? null : uploadButton }
               </Upload>
               <Modal
                 visible={previewVisible}
@@ -271,6 +319,9 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
               <Editor />
             </Form.Item>
           </Form>
+          <Button
+            onClick={() => this.uploadProps()}
+          />
         </Card>
 
       </PageHeaderWrapper>

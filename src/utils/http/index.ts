@@ -2,13 +2,13 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { request } from '@/utils/http/interface';
 import httpStatus from '@/utils/http/returnCode';
 import router from 'umi/router';
-import {message} from "antd";
+import { message } from 'antd';
+import { globalFixed } from '@/globallEnum/keyCommon';
 
-const Token = 'GOBUILD_TOKEN';
 axios.interceptors.request.use(async (config: AxiosRequestConfig) => {
   config.headers['Content-Type'] = 'application/json';
   if (config.url && (config.url).indexOf('/api/admin/login') === -1) {
-      config.headers.token = sessionStorage.getItem(Token)
+      config.headers.token = sessionStorage.getItem(globalFixed.TOKEN_ID)
   }
   return config;
 });
@@ -16,6 +16,7 @@ axios.interceptors.request.use(async (config: AxiosRequestConfig) => {
 axios.interceptors.response.use(async (res: any) => {
   if (res.data.code === httpStatus.RESTRICT) {
     await message.error('请重新登陆，访问已到期！');
+    await sessionStorage.removeItem(globalFixed.TOKEN_ID);
     await router.push('/user/login')
   }
   return res

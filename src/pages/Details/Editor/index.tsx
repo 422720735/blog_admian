@@ -3,7 +3,15 @@ import React from 'react'
 import BraftEditor from 'braft-editor'
 import 'braft-editor/dist/index.css'
 
-export default class EditorDemo extends React.Component {
+interface Props {
+  onHandleInnerHTML: Function
+}
+
+export default class EditorDemo extends React.Component<Props> {
+  // eslint-disable-next-line no-useless-constructor
+  constructor(props: Props) {
+    super(props);
+  }
   state = {
     editorState: BraftEditor.createEditorState(null)
   }
@@ -16,9 +24,11 @@ export default class EditorDemo extends React.Component {
   }
 
   submitContent = async () => {
+    const { onHandleInnerHTML } = this.props;
     // 在编辑器获得焦点时按下ctrl+s会执行此方法
     // 编辑器内容提交到服务端之前，可直接调用editorState.toHTML()来获取HTML格式的内容
     const htmlContent = this.state.editorState.toHTML()
+    onHandleInnerHTML(htmlContent)
     // const result = await saveEditorContent(htmlContent)
   }
 
@@ -51,7 +61,7 @@ export default class EditorDemo extends React.Component {
   }
 
   render() {
-    const { editorState } = this.state
+    const { editorState } = this.state;
     return (
       <div className="my-component">
         <BraftEditor

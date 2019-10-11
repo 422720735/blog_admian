@@ -19,7 +19,8 @@ import { getCategory } from '../Center/api';
 import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
 import Style from './style.less';
-import Editor from './Editor/old';
+import Editor from './Editor';
+import reg from '../../utils/RegExp';
 import { RcFile, UploadChangeParam } from 'antd/es/upload';
 import { UploadFile } from 'antd/es/upload/interface';
 
@@ -35,7 +36,8 @@ interface State {
   // 照片墙
   previewVisible: boolean;
   previewImage: string;
-  fileData: any[],
+  fileData: any[];
+  html: string;
 }
 
 class Details extends React.Component<DetailsFollow.DetailsForm, State> {
@@ -48,6 +50,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     previewVisible: false,
     previewImage: '',
     fileData: [],
+    html: '',
   };
 
   private input: any;
@@ -145,7 +148,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     UpImg.append('file', fileData[0]);
     try {
       const response = await Api.uploadFormData(UpImg);
-      if (response.data.code != httpStatus.Ok) {
+      if (response.data.code === httpStatus.Ok) {
         message.success('图片上传成功')
       } else {
         message.error(response.data.msg);
@@ -177,6 +180,31 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     });
   }
 
+  handleSubmit = (e: any) => {
+    const { tags } = this.state;
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        if (tags.length > 0) {
+          values.tags = this.state.tags.join(',');
+        }
+        values.content = this.state.html;
+        console.log('Received values of form: ', values);
+      }
+    });
+  };
+
+  checkUrl = (rule: any, value: string, callback: Function) => {
+    if (!value || value === '') {
+      callback();
+      return
+    }
+    const bool = reg(value);
+    if (!bool) {
+      callback('不是正确的网址吧，请注意检查!');
+    } else callback()
+  };
+
   render() {
     const formItemLayout = {
       labelCol: { span: 3 },
@@ -205,7 +233,10 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     return (
       <PageHeaderWrapper title={false}>
         <Card>
-          <Form {...formItemLayout}>
+          <Form
+            {...formItemLayout}
+            onSubmit={this.handleSubmit}
+          >
             <Form.Item label="标题：" hasFeedback>
               {getFieldDecorator('title', {
                 initialValue: '',
@@ -237,23 +268,29 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             </Form.Item>
 
             <Form.Item label="加入首页">
-              <Checkbox
-                className={!checked && Style.NO}
-                checked={checked}
-                onChange={() => this.handleIsTop()}
-              >置首</Checkbox>
+              {getFieldDecorator('isTop', {
+                initialValue: false,
+              })(
+                <Checkbox
+                  className={!checked && Style.NO}
+                  checked={checked}
+                  onChange={() => this.handleIsTop()}
+                >置首</Checkbox>)}
             </Form.Item>
 
             <Form.Item label="链接">
-              {getFieldDecorator('title', {
+              {getFieldDecorator('url', {
                 initialValue: '',
                 rules: [
                   {
-                    required: true,
-                    message: '必填项不能为空!',
+                    required: false,
+                    message: '不是正确的网址吧，请注意检查!',
+                  },
+                  {
+                    validator: this.checkUrl,
                   },
                 ],
-              })(<Input/>)}
+              })(<Input placeholder="配置跳转到外部链接" />)}
             </Form.Item>
 
             <Form.Item label="标签">
@@ -316,12 +353,21 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
               </Modal>
             </Form.Item>
             <Form.Item label="内容">
-              <Editor />
+              {getFieldDecorator('content')(
+                <Editor
+                  onHandleInnerHTML={(t: string) => this.setState({ html: t })}
+                />)}
+            </Form.Item>
+
+            <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
             </Form.Item>
           </Form>
           <Button
             onClick={() => this.uploadProps()}
-          />
+          >提交</Button>
         </Card>
 
       </PageHeaderWrapper>

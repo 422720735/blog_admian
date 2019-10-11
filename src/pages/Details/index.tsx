@@ -19,7 +19,7 @@ import { getCategory } from '../Center/api';
 import * as Api from './api';
 import httpStatus from '@/utils/http/returnCode';
 import Style from './style.less';
-import Editor from './Editor';
+import Editor from './Editor/old';
 import { RcFile, UploadChangeParam } from 'antd/es/upload';
 import { UploadFile } from 'antd/es/upload/interface';
 

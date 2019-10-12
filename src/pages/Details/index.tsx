@@ -10,7 +10,8 @@ import {
   Tooltip,
   Icon,
   Upload,
-  Modal, Button,
+  Modal,
+  Button,
 } from 'antd';
 
 import { DetailsFollow } from '@/pages/Details/interface';
@@ -38,6 +39,7 @@ interface State {
   previewImage: string;
   fileData: any[];
   html: string;
+  loadBool: boolean;
 }
 
 class Details extends React.Component<DetailsFollow.DetailsForm, State> {
@@ -51,6 +53,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     previewImage: '',
     fileData: [],
     html: '',
+    loadBool: false,
   };
 
   private input: any;
@@ -185,14 +188,33 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
+        values.image = '';
+        values.tags = '';
         if (tags.length > 0) {
           values.tags = this.state.tags.join(',');
         }
+        values.image = '/assets/1570845563.png';
         values.content = this.state.html;
+        this.fetchForm(values);
+        this.setState({ loadBool: true });
         console.log('Received values of form: ', values);
       }
     });
   };
+
+  private async fetchForm(params: DetailsFollow.formSubmit) {
+    try {
+      const response = await Api.insertArticleInfo(params);
+      if (response.data.code === httpStatus.Ok) {
+        message.success(response.data.msg)
+      } else {
+        message.error(response.data.msg)
+      }
+    } catch (e) {
+      message.error(e);
+    }
+    this.setState({ loadBool: false });
+  }
 
   checkUrl = (rule: any, value: string, callback: Function) => {
     if (!value || value === '') {
@@ -221,6 +243,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
       tagList,
       checked,
       fileData,
+      loadBool,
     } = this.state;
 
     const uploadButton = (
@@ -251,7 +274,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
 
             <Form.Item label="类别：" hasFeedback>
               {tagList.length > 0 &&
-              getFieldDecorator('select', {
+              getFieldDecorator('categoryId', {
                 initialValue: '',
                 rules: [{ required: true, message: '选项不能为空！' }],
               })(
@@ -360,7 +383,10 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             </Form.Item>
 
             <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-              <Button type="primary" htmlType="submit">
+              <Button
+                loading={loadBool}
+                type="primary"
+                htmlType="submit">
                 Submit
               </Button>
             </Form.Item>
@@ -369,7 +395,6 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             onClick={() => this.uploadProps()}
           >提交</Button>
         </Card>
-
       </PageHeaderWrapper>
     )
   }

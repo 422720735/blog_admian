@@ -4,4 +4,35 @@ declare namespace DetailsFollow {
   interface DetailsForm {
     form: FormComponentProps['form']
   }
+
+  interface formSubmit {
+    /**
+     * 标题
+     */
+    title: string;
+    /**
+     * 类型
+     */
+    categoryId: number;
+    /**
+     * 外部链接
+     */
+    url?: string;
+    /**
+     * 置顶
+     */
+    isTop: boolean;
+    /**
+     * 标签
+     */
+    tags: string; // a1, a2, a3 多个值 ","分割
+    /**
+     * 封面
+     * */
+    image: string;
+    /**
+     * 内容 富文本部分
+     */
+    content: string;
+  }
 }

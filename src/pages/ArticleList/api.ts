@@ -14,3 +14,7 @@ export function getArticleList(params: ArticleFollow.ArticleListQuery):
 }> {
   return http.get(`${host}/articleList/get`, { params: { ...params } });
 }
+
+export function fetchIsTop(params: ArticleFollow.UpdateIstop) {
+  return http.post(`${host}/article/isTop/update`, params)
+}

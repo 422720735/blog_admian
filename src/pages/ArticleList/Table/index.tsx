@@ -1,7 +1,10 @@
 import React from 'react';
 import { Popconfirm, Table } from 'antd';
 import { ArticleFollow } from '@/pages/ArticleList/interface';
+import { fetchIsTop } from '../api';
 import moment from 'moment';
+import { message } from 'antd/es';
+import httpStatus from '@/utils/http/returnCode';
 
 const { Column } = Table;
 
@@ -41,6 +44,20 @@ export default class Index extends React.Component<Props> {
       }
     }
     return typeName;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private async handleIsTop(params: ArticleFollow.UpdateIstop) {
+    try {
+      const response = await fetchIsTop(params);
+      if (response.data.code === httpStatus.Ok) {
+        message.success(response.data.msg);
+      } else {
+        message.error(response.data.msg);
+      }
+    } catch (e) {
+      message.error(e);
+    }
   }
 
   render() {
@@ -89,25 +106,27 @@ export default class Index extends React.Component<Props> {
           <Column
             title="置顶"
             render={(text, record) =>
-              text.isTop === 1 ? (
+              (text.isTop ? (
                 <Popconfirm
-                  title="当前数据是否需要置顶？"
+                  title="当前数据是否需要普通？"
                   placement="rightTop"
                   okText="Yes"
                   cancelText="No"
-                >
-                  <a>普通</a>
-                </Popconfirm>
-              ) : (
-                <Popconfirm
-                  title="当前数据是否需要修改为普通？"
-                  placement="rightTop"
-                  okText="Yes"
-                  cancelText="No"
+                  onConfirm={() => this.handleIsTop({ id: text.id, isTop: !text.isTop })}
                 >
                   <a style={{ color: '#f5222d' }}>置顶</a>
                 </Popconfirm>
-              )
+              ) : (
+                <Popconfirm
+                  title="当前数据是否需要修改为置顶？"
+                  placement="rightTop"
+                  okText="Yes"
+                  cancelText="No"
+                  onConfirm={() => this.handleIsTop({ id: text.id, isTop: !text.isTop })}
+                >
+                  <a>普通</a>
+                </Popconfirm>
+              ))
             }
           />
           <Column title="点击量" render={(text, record) => <span>{text.views}</span>} />

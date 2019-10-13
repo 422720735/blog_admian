@@ -16,9 +16,14 @@ declare namespace ArticleFollow {
   interface ArticleList {
     id?: number;
     title?: string;
-    isTop?: number;
+    isTop?: boolean;
     created?: number;
     updated?: number;
     tags?: string | number;
+  }
+
+  interface UpdateIstop {
+    id: number;
+    isTop: boolean;
   }
 }

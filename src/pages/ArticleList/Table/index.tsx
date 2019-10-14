@@ -4,6 +4,7 @@ import { ArticleFollow } from '@/pages/ArticleList/interface';
 import { fetchIsTop } from '../api';
 import moment from 'moment';
 import { message } from 'antd/es';
+import router from 'umi/router';
 import httpStatus from '@/utils/http/returnCode';
 
 const { Column } = Table;
@@ -19,6 +20,7 @@ interface Props {
   articleType: number;
   handlePage: Function;
   tags: { id?: number; created?: number; updated?: number; name?: string }[];
+
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
@@ -59,6 +61,16 @@ export default class Index extends React.Component<Props> {
       message.error(e);
     }
   }
+
+  private hanleUpdaInfo(id: number) {
+    router.push({
+      pathname: '/center/details',
+      query: {
+        id,
+      },
+    })
+  }
+
 
   render() {
     const { dataSource } = this.props;
@@ -134,7 +146,7 @@ export default class Index extends React.Component<Props> {
             title="操作"
             render={(text, record) => (
               <span>
-                <a onClick={() => {}}>修改</a>&emsp;|&emsp;
+                <a onClick={() => this.hanleUpdaInfo(text.id)}>修改</a>&emsp;|&emsp;
                 <Popconfirm title="确定要删除吗？" okText="Yes" cancelText="No">
                   <a>删除</a>
                 </Popconfirm>

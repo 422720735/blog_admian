@@ -111,7 +111,6 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
      * 支持返回一个 Promise 对象，Promise 对象 reject 时则停止上传，
      * resolve 时开始上传（ resolve 传入 File 或 Blob 对象则上传 resolve 传入对象）。注意：IE9 不支持该方法。
      */
-    console.log(file, '文件')
     if (file.size > 1024 * 1024 * 3) {
       message.error('你上传的文件过大，请重新上传');
     }
@@ -139,6 +138,17 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
         this.setState({ tagList: data });
       } else {
         message.error(data);
+      }
+
+      if (this.props.location.query.id) {
+
+        const responseTo = await Api.getArticleInfo(this.props.location.query.id);
+        // eslint-disable-next-line no-empty
+        if (responseTo.data.code === httpStatus.Ok) {
+
+        } else {
+          message.error(responseTo.data.msg)
+        }
       }
     } catch (e) {
       message.error(e);
@@ -197,7 +207,6 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
         values.content = this.state.html;
         this.fetchForm(values);
         this.setState({ loadBool: true });
-        console.log('Received values of form: ', values);
       }
     });
   };
@@ -251,7 +260,9 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
         <Icon type="plus" />
         <div className="ant-upload-text">Upload</div>
       </div>
-    )
+    );
+
+    const id = this.props.location.query.id ? this.props.location.query.id : null;
 
     return (
       <PageHeaderWrapper title={false}>
@@ -262,7 +273,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
           >
             <Form.Item label="标题：" hasFeedback>
               {getFieldDecorator('title', {
-                initialValue: '',
+                initialValue: id ? '1' : '',
                 rules: [
                   {
                     required: true,
@@ -378,7 +389,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             <Form.Item label="内容">
               {getFieldDecorator('content')(
                 <Editor
-                  onHandleInnerHTML={(t: string) => this.setState({ html: t })}
+                  onHandleInnerHTML={(text: string) => this.setState({ html: text })}
                 />)}
             </Form.Item>
 

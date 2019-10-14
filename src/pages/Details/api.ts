@@ -11,3 +11,8 @@ export function uploadFormData(params: FormData): request.PageRes<string> {
 export function insertArticleInfo(params: DetailsFollow.formSubmit) {
   return http.post(`${host}/article/info/add`, params)
 }
+
+export function getArticleInfo(id: number) {
+  const params = { id };
+  return http.get(`${host}/article/info/get`, { params: { ...params } })
+}

@@ -5,7 +5,8 @@ import _ from 'lodash';
 import 'braft-editor/dist/index.css'
 
 interface Props {
-  onHandleInnerHTML: Function
+  onHandleInnerHTML: Function,
+  dataSource: string;
 }
 
 interface State {
@@ -25,8 +26,10 @@ export default class EditorDemo extends React.Component<Props, State> {
 
   // @ts-ignore
   componentDidMount() {
+    const { dataSource } = this.props;
+    console.log(dataSource, 'ddddd');
     this.setState({
-      editorState: BraftEditor.createEditorState(''),
+      editorState: BraftEditor.createEditorState(dataSource),
     });
   }
 

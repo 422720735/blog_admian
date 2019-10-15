@@ -40,6 +40,7 @@ interface State {
   fileData: any[];
   html: string;
   loadBool: boolean;
+  articleInfo: DetailsFollow.postInfoV
 }
 
 class Details extends React.Component<DetailsFollow.DetailsForm, State> {
@@ -54,6 +55,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     fileData: [],
     html: '',
     loadBool: false,
+    articleInfo: {},
   };
 
   private input: any;
@@ -139,13 +141,12 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
       } else {
         message.error(data);
       }
-
       if (this.props.location.query.id) {
-
         const responseTo = await Api.getArticleInfo(this.props.location.query.id);
         // eslint-disable-next-line no-empty
         if (responseTo.data.code === httpStatus.Ok) {
-
+          const articleInfo = responseTo.data.msg;
+          this.setState({ articleInfo })
         } else {
           message.error(responseTo.data.msg)
         }
@@ -253,6 +254,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
       checked,
       fileData,
       loadBool,
+      articleInfo,
     } = this.state;
 
     const uploadButton = (
@@ -262,7 +264,9 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
       </div>
     );
 
-    const id = this.props.location.query.id ? this.props.location.query.id : null;
+    const isUpdate = Object.keys(articleInfo);
+
+    console.log(articleInfo.content, 'content');
 
     return (
       <PageHeaderWrapper title={false}>
@@ -273,7 +277,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
           >
             <Form.Item label="标题：" hasFeedback>
               {getFieldDecorator('title', {
-                initialValue: id ? '1' : '',
+                initialValue: isUpdate.length > 0 ? articleInfo.title : '',
                 rules: [
                   {
                     required: true,
@@ -286,7 +290,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             <Form.Item label="类别：" hasFeedback>
               {tagList.length > 0 &&
               getFieldDecorator('categoryId', {
-                initialValue: '',
+                initialValue: isUpdate.length > 0 ? articleInfo.categoryId : '',
                 rules: [{ required: true, message: '选项不能为空！' }],
               })(
                 <Select>
@@ -303,7 +307,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
 
             <Form.Item label="加入首页">
               {getFieldDecorator('isTop', {
-                initialValue: false,
+                initialValue: isUpdate.length > 0 ? articleInfo.isTop : '',
               })(
                 <Checkbox
                   className={!checked && Style.NO}
@@ -389,6 +393,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             <Form.Item label="内容">
               {getFieldDecorator('content')(
                 <Editor
+                  dataSource={isUpdate.length > 0 ? articleInfo.content : ''}
                   onHandleInnerHTML={(text: string) => this.setState({ html: text })}
                 />)}
             </Form.Item>

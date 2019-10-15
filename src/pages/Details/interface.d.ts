@@ -35,4 +35,26 @@ declare namespace DetailsFollow {
      */
     content: string;
   }
+
+  interface postInfoV extends formSubmit {
+    id: number;
+    userId: number;
+    /**
+     * 阅读量
+     */
+    views: number;
+    /**
+     * 创建时间
+     */
+    created: number;
+    /**
+     * 更新时间
+     */
+    updated: number;
+    /**
+     * 后面暂定
+     */
+    types: number;
+    info: string;
+  }
 }

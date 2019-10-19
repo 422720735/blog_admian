@@ -24,6 +24,7 @@ import Editor from './Editor';
 import reg from '../../utils/RegExp';
 import { RcFile, UploadChangeParam } from 'antd/es/upload';
 import { UploadFile } from 'antd/es/upload/interface';
+import { splitTags } from '../../utils/magic';
 
 const { Option } = Select;
 
@@ -40,7 +41,7 @@ interface State {
   fileData: any[];
   html: string;
   loadBool: boolean;
-  articleInfo: DetailsFollow.postInfoV
+  articleInfo: DetailsFollow.postInfoV;
 }
 
 class Details extends React.Component<DetailsFollow.DetailsForm, State> {
@@ -62,14 +63,14 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
 
   private handleIsTop() {
     const { checked } = this.state;
-    this.setState({ checked: !checked })
+    this.setState({ checked: !checked });
   }
 
   /** *
    * 标签部分
    * @param removedTag
    */
-    // eslint-disable-next-line react/sort-comp
+  // eslint-disable-next-line react/sort-comp
   handleClose = (removedTag: any) => {
     // eslint-disable-next-line react/no-access-state-in-setstate
     const tags = this.state.tags.filter(tag => tag !== removedTag);
@@ -80,7 +81,7 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     this.setState({ inputVisible: true }, () => this.input.focus());
   };
 
-  handleInputChange = (e: { target: { value: string; }; }) => {
+  handleInputChange = (e: { target: { value: string } }) => {
     this.setState({ inputValue: e.target.value });
   };
 
@@ -100,11 +101,6 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
   // eslint-disable-next-line no-return-assign
   saveInputRef = (input: any) => (this.input = input);
 
-  // 这个是监听文件变化的
-  fileChange = (params: UploadChangeParam) => {
-    console.log(params)
-  }
-
   // 拦截文件上传
   beforeUploadHandle = (file: RcFile) => {
     /**
@@ -116,21 +112,25 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     if (file.size > 1024 * 1024 * 3) {
       message.error('你上传的文件过大，请重新上传');
     }
-    this.setState(({ fileData }) => ({
-      fileData: [...fileData, file],
-    }));
-    return false
-  }
+    this.setState(
+      ({ fileData }) => ({
+        fileData: [...fileData, file],
+      }),
+      () => {
+        this.uploadProps();
+      },
+    );
+    return false;
+  };
 
   // 文件列表的删除
   fileRemove = (file: UploadFile) => {
-    this.setState(({ fileData }) => {
-      const index = fileData.indexOf(file);
+    this.setState(() => {
       return {
-        fileData: fileData.filter((_, i) => i !== index),
-      }
-    })
-  }
+        fileData: [],
+      };
+    });
+  };
 
   async componentDidMount() {
     try {
@@ -146,9 +146,23 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
         // eslint-disable-next-line no-empty
         if (responseTo.data.code === httpStatus.Ok) {
           const articleInfo = responseTo.data.msg;
-          this.setState({ articleInfo })
+          this.setState({ articleInfo });
+          if (articleInfo.tags && articleInfo.tags !== '' && articleInfo.tags !== ',') {
+            const labeling = splitTags(articleInfo.tags);
+            this.setState({ tags: labeling });
+          }
+          if (!articleInfo.image || articleInfo.image !== '') {
+            this.setState({
+              fileData: [
+                {
+                  uid: '1',
+                  url: `http://pz8o2was4.bkt.clouddn.com/${articleInfo.image}`,
+                },
+              ],
+            });
+          }
         } else {
-          message.error(responseTo.data.msg)
+          message.error(responseTo.data.msg);
         }
       }
     } catch (e) {
@@ -163,13 +177,15 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     try {
       const response = await Api.uploadFormData(UpImg);
       if (response.data.code === httpStatus.Ok) {
-        message.success('图片上传成功')
+        message.success('图片上传成功', () => {
+          this.setState({ imgStr: response.data.msg });
+        });
       } else {
         message.error(response.data.msg);
         this.setState({ fileData: [] });
       }
     } catch (e) {
-      message.error(e)
+      message.error(e);
     }
   }
 
@@ -192,20 +208,34 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
       previewImage: file.url || file.preview,
       previewVisible: true,
     });
-  }
+  };
 
   handleSubmit = (e: any) => {
-    const { tags } = this.state;
+    const { tags, articleInfo, fileData } = this.state;
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
         values.image = '';
         values.tags = '';
         if (tags.length > 0) {
-          values.tags = this.state.tags.join(',');
+          values.tags = tags.join(',');
+          values.tags += ',';
         }
-        values.image = '/assets/1570845563.png';
+        if (articleInfo.id) {
+          values.id = articleInfo.id;
+        }
+        values.image = `${fileData[0]}`;
         values.content = this.state.html;
+        switch (values.isTop) {
+          case 0:
+            values.isTop = false;
+            break;
+          case 1:
+            values.isTop = true;
+            break;
+          default:
+            values.isTop = false;
+        }
         this.fetchForm(values);
         this.setState({ loadBool: true });
       }
@@ -216,9 +246,9 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     try {
       const response = await Api.insertArticleInfo(params);
       if (response.data.code === httpStatus.Ok) {
-        message.success(response.data.msg)
+        message.success(response.data.msg);
       } else {
-        message.error(response.data.msg)
+        message.error(response.data.msg);
       }
     } catch (e) {
       message.error(e);
@@ -229,12 +259,12 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
   checkUrl = (rule: any, value: string, callback: Function) => {
     if (!value || value === '') {
       callback();
-      return
+      return;
     }
     const bool = reg(value);
     if (!bool) {
       callback('不是正确的网址吧，请注意检查!');
-    } else callback()
+    } else callback();
   };
 
   render() {
@@ -265,16 +295,10 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
     );
 
     const isUpdate = Object.keys(articleInfo);
-
-    console.log(articleInfo.content, 'content');
-
     return (
       <PageHeaderWrapper title={false}>
         <Card>
-          <Form
-            {...formItemLayout}
-            onSubmit={this.handleSubmit}
-          >
+          <Form {...formItemLayout} onSubmit={this.handleSubmit}>
             <Form.Item label="标题：" hasFeedback>
               {getFieldDecorator('title', {
                 initialValue: isUpdate.length > 0 ? articleInfo.title : '',
@@ -284,41 +308,44 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                     message: '必填项不能为空!',
                   },
                 ],
-              })(<Input/>)}
+              })(<Input />)}
             </Form.Item>
 
             <Form.Item label="类别：" hasFeedback>
               {tagList.length > 0 &&
-              getFieldDecorator('categoryId', {
-                initialValue: isUpdate.length > 0 ? articleInfo.categoryId : '',
-                rules: [{ required: true, message: '选项不能为空！' }],
-              })(
-                <Select>
-                  {tagList.length > 0
-                    ? tagList.map(item => (
-                      <Option value={item.id} key={item.id}>
-                        {item.name}
-                      </Option>
-                    ))
-                    : null}
-                </Select>,
-              )}
+                getFieldDecorator('categoryId', {
+                  initialValue: isUpdate.length > 0 ? articleInfo.categoryId : '',
+                  rules: [{ required: true, message: '选项不能为空！' }],
+                })(
+                  <Select>
+                    {tagList.length > 0
+                      ? tagList.map(item => (
+                          <Option value={item.id} key={item.id}>
+                            {item.name}
+                          </Option>
+                        ))
+                      : null}
+                  </Select>,
+                )}
             </Form.Item>
 
             <Form.Item label="加入首页">
               {getFieldDecorator('isTop', {
-                initialValue: isUpdate.length > 0 ? articleInfo.isTop : '',
+                initialValue: isUpdate.length > 0 ? articleInfo.isTop : false,
               })(
                 <Checkbox
                   className={!checked && Style.NO}
                   checked={checked}
                   onChange={() => this.handleIsTop()}
-                >置首</Checkbox>)}
+                >
+                  置首
+                </Checkbox>,
+              )}
             </Form.Item>
 
             <Form.Item label="链接">
               {getFieldDecorator('url', {
-                initialValue: '',
+                initialValue: isUpdate.length > 0 ? articleInfo.url : '',
                 rules: [
                   {
                     required: false,
@@ -332,15 +359,11 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
             </Form.Item>
 
             <Form.Item label="标签">
-              {tags.map((tag) => {
-                const isLongTag = tag.length > 20;
+              {tags.map(tag => {
+                const isLongTag = tags.length > 20;
                 const tagElem = (
-                  <Tag
-                    key={tag}
-                    closable
-                    onClose={() => this.handleClose(tag)}
-                  >
-                    {isLongTag ? `${tag.slice(0, 20)}...` : tag}
+                  <Tag key={tag} closable onClose={() => this.handleClose(tag)}>
+                    {tag}
                   </Tag>
                 );
                 return isLongTag ? (
@@ -375,12 +398,12 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                 accept="image/*"
                 action="http://localhost:4000/api/admin/v2/fileuplaod"
                 listType="picture-card"
+                fileList={fileData}
                 beforeUpload={this.beforeUploadHandle}
                 onPreview={this.handlePreview}
-                onChange={this.fileChange}
                 onRemove={this.fileRemove}
               >
-                { fileData.length >= 8 ? null : uploadButton }
+                {fileData.length >= 1 ? null : uploadButton}
               </Upload>
               <Modal
                 visible={previewVisible}
@@ -395,25 +418,20 @@ class Details extends React.Component<DetailsFollow.DetailsForm, State> {
                 <Editor
                   dataSource={isUpdate.length > 0 ? articleInfo.content : ''}
                   onHandleInnerHTML={(text: string) => this.setState({ html: text })}
-                />)}
+                />,
+              )}
             </Form.Item>
 
-            <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
-              <Button
-                loading={loadBool}
-                type="primary"
-                htmlType="submit">
-                Submit
+            <Form.Item>
+              <Button loading={loadBool} type="primary" htmlType="submit">
+                {isUpdate.length > 0 ? '编辑' : '新增'}
               </Button>
             </Form.Item>
           </Form>
-          <Button
-            onClick={() => this.uploadProps()}
-          >提交</Button>
         </Card>
       </PageHeaderWrapper>
-    )
+    );
   }
 }
 
-export default Form.create<DetailsFollow.DetailsForm>()(Details)
+export default Form.create<DetailsFollow.DetailsForm>()(Details);

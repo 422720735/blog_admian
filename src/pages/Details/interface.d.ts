@@ -2,10 +2,11 @@ import { FormComponentProps } from 'antd/es/form';
 
 declare namespace DetailsFollow {
   interface DetailsForm {
-    form: FormComponentProps['form']
+    form: FormComponentProps['form'];
   }
 
   interface formSubmit {
+    id?: number;
     /**
      * 标题
      */
@@ -37,7 +38,6 @@ declare namespace DetailsFollow {
   }
 
   interface postInfoV extends formSubmit {
-    id: number;
     userId: number;
     /**
      * 阅读量

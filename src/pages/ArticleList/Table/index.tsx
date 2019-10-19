@@ -1,7 +1,7 @@
 import React from 'react';
 import { Popconfirm, Table } from 'antd';
 import { ArticleFollow } from '@/pages/ArticleList/interface';
-import { fetchIsTop } from '../api';
+import { fetchIsTop, fetchDelInfo } from '../api';
 import moment from 'moment';
 import { message } from 'antd/es';
 import router from 'umi/router';
@@ -20,7 +20,6 @@ interface Props {
   articleType: number;
   handlePage: Function;
   tags: { id?: number; created?: number; updated?: number; name?: string }[];
-
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
@@ -29,6 +28,10 @@ export default class Index extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
   }
+
+  state: { load: boolean } = {
+    load: false,
+  };
 
   handlePage = async (page: number) => {
     this.props.handlePage(page);
@@ -68,16 +71,32 @@ export default class Index extends React.Component<Props> {
       query: {
         id,
       },
-    })
+    });
   }
 
+  private async handleDelArticleInfo(id: number) {
+    this.setState({ load: true });
+    try {
+      const response = await fetchDelInfo(id);
+      if (response.data.code === httpStatus.Ok) {
+        message.success(response.data.msg);
+      } else {
+        message.error(response.data.msg);
+      }
+    } catch (e) {
+      message.error(e);
+    }
+    this.setState({ load: false });
+  }
 
   render() {
     const { dataSource } = this.props;
     const { data } = dataSource;
+    const { load } = this.state;
     return (
       <div>
         <Table
+          loading={load}
           dataSource={data}
           rowKey={record => `${record.id}`}
           pagination={{
@@ -118,7 +137,7 @@ export default class Index extends React.Component<Props> {
           <Column
             title="置顶"
             render={(text, record) =>
-              (text.isTop ? (
+              text.isTop ? (
                 <Popconfirm
                   title="当前数据是否需要普通？"
                   placement="rightTop"
@@ -138,7 +157,7 @@ export default class Index extends React.Component<Props> {
                 >
                   <a>普通</a>
                 </Popconfirm>
-              ))
+              )
             }
           />
           <Column title="点击量" render={(text, record) => <span>{text.views}</span>} />
@@ -147,7 +166,12 @@ export default class Index extends React.Component<Props> {
             render={(text, record) => (
               <span>
                 <a onClick={() => this.hanleUpdaInfo(text.id)}>修改</a>&emsp;|&emsp;
-                <Popconfirm title="确定要删除吗？" okText="Yes" cancelText="No">
+                <Popconfirm
+                  title="确定要删除吗？"
+                  okText="Yes"
+                  cancelText="No"
+                  onConfirm={() => this.handleDelArticleInfo(text.id)}
+                >
                   <a>删除</a>
                 </Popconfirm>
               </span>

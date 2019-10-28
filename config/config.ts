@@ -205,6 +205,8 @@ export default {
   manifest: {
     basePath: '/',
   },
+  base: './',
+  publicPath: './',
   chainWebpack: webpackPlugin,
 
   proxy: {
